@@ -1,9 +1,5 @@
 import pool from './db.js';
 
-//CAMBIAR TODO ESTE CODIGO, ES SOLO DE EJEMPLO (TRABAJO EN CLASES)
-//Cambiar users por students*
-// comillas ;
-
 const consultarDB = (consulta) => {
     return new Promise(async (resolve, reject) => {
         try {
