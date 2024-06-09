@@ -41,7 +41,7 @@ const getStudents = async () => {
         return students;
     } catch (error) {
         console.log(error);
-        throw new Error("Error al traer los datos del estudiante.");
+        throw new Error("Error al traer los datos de los estudiantes.");
     }
 };
 
@@ -60,7 +60,7 @@ const getStudentsByRut = async (rut) => {
         throw new Error("Error al traer al filtrar el estudiante por rut.");
     }
 }
-//getStudentsByRut();
+//getStudentsByRut();   => Agregar parametro rut
 
 const updateStudent = async (student) => {
     try {
