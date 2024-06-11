@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
@@ -11,33 +11,43 @@
     <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
+    <style type="text/css">
+        .fixed-width {
+            width: 100px;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .input-group .form-control {
+            flex: 1;
+        }
+    </style>
 </head>
 
 <body>
-    <header class="py-5">
-        <h1 class="text-center">Registro Estudiantes</h1>
+    <header>
+        <h1 class="text-center py-0 my-0 my-2">Registro Estudiantes</h1>
     </header>
 
     <main class="container pb-5">
         <!-- Registro estudiantes -->
         <section class="sect-add-student">
             <form id="formAddStudent" action="/api/students" method="post" class="w-50 mx-auto">
-                <div>
-                    <label for="nameAddStudent" class="form-label">Nombre:</label>
-                    <input type="text" class="form-control" name="name" id="nameAddStudent">
+                <div class="input-group">
+                    <span class="input-group-text fixed-width">Nombre</span>
+                    <input type="text" aria-label="Nombre" name="name" class="form-control">
                 </div>
-                <div>
-                    <!-- addUser - User-->
-                    <label for="rutAddStudent" class="form-label">Rut:</label>
-                    <input type="text" class="form-control" name="rut" id="rutAddStudent">
+                <div class="input-group">
+                    <span class="input-group-text fixed-width">Rut</span>
+                    <input type="text" aria-label="Nombre" name="rut" class="form-control">
                 </div>
-                <div>
-                    <label for="courseAddStudent" class="form-label">Course:</label>
-                    <input type="text" class="form-control" name="course" id="courseAddStudent">
+                <div class="input-group">
+                    <span class="input-group-text fixed-width">Curso</span>
+                    <input type="text" aria-label="Nombre" name="course" class="form-control">
                 </div>
-                <div>
-                    <label for="levelAddStudent" class="form-label">Level:</label>
-                    <input type="text" class="form-control" name="level" id="levelAddStudent">
+                <div class="input-group">
+                    <span class="input-group-text fixed-width">Nivel</span>
+                    <input type="text" aria-label="Nombre" name="level" class="form-control">
                 </div>
                 <div class="d-flex justify-content-center">
                     <input type="submit" class="btn btn-success my-2" value="Agregar">
@@ -45,16 +55,64 @@
             </form>
         </section>
 
+        <!-- Formulario envía una solicitud GET a /api/allstudents 
+    y devuelve un JSON con un arreglo de todos los estudiantes -->
         <section class="w-50 mx-auto text-center">
             <form action="/api/allstudents" method="get">
                 <input type="submit" class="btn btn-dark my-2" value="Consultar todos los estudiantes">
             </form>
         </section>
 
+        <section>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Nombre</th>
+                        <th scope="col">Rut</th>
+                        <th scope="col">Curso</th>
+                        <th scope="col">Nivel</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-estudiantes">
+                    <!--  <tr>
+                            <th scope="row">1</th>
+                            <td></td>
+                            <td></td>
+                            <td></td>                        
+                            <td></td>                        
+                            <td></td>
+                    </tr> -->
+                </tbody>
+            </table>
+        </section>
+
     </main>
 
     <script>
+        const fetchStudents = async () => {
+            try {
+                const respuesta = await fetch ('/api/allstudents');
+                const data = await respuesta.json();
+                const cuerpoTabla = document.getElementById('tabla-estudiantes');
+                data.forEach(estudiantes => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${estudiantes.id}</td>
+                        <td>${estudiantes.name}</td>
+                        <td>${estudiantes.rut}</td>
+                        <td>${estudiantes.course}</td>
+                        <td>${estudiantes.level}</td>
+                    `;
+                    cuerpoTabla.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error al obtener los datos de los estudiantes');
+            }
+        };
+        fetchStudents()
     </script>
+
 
 </body>
 

@@ -55,6 +55,7 @@ app.post("/api/students", async (req, res) => {
     }
 });
 
+
 // Obtener todos los estudiantes
 app.get("/api/allstudents", async (req, res) => {
     try {
