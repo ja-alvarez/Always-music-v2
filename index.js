@@ -1,9 +1,8 @@
 import express from 'express';
 import studentsCRUD from './crudStudents.js';
 
-
-import * as path from "path";
-import { fileURLToPath } from "url";
+import * as path from 'path';
+import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
@@ -18,12 +17,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
 //RUTA PÁGINA PRINCIPAL
-app.get("/", (req, res) => {
-    res.sendFile(path.resolve(__dirname, "./public/index.html"));
+app.get('/', (req, res) => {
+    res.sendFile(path.resolve(__dirname, './public/index.html'));
 })
 
-//Api crear nuevo usuario
-app.post("/api/students", async (req, res) => {
+//CREAR NUEVO USUARIO
+app.post('/api/students', async (req, res) => {
     try {
         let { name, rut, course, level } = req.body;
         if (!name || !rut || !course || !level) {
@@ -37,88 +36,89 @@ app.post("/api/students", async (req, res) => {
         let newStudent = {
             name, rut, course, level
         }
-        let student = await studentsCRUD.addStudent(newStudent);
+        await studentsCRUD.addStudent(newStudent);
         res.status(201).send(`
         <script>
-            alert("Estudiante creado con éxito.");
+            alert('Estudiante creado con éxito.');
             window.location.href = "/";
         </script>
     `);
     } catch (error) {
-        console.log(error.message);
         res.status(500).send(`
         <script>
-            alert("${error.message}");
+            alert('${error.message}');
             window.location.href = "/";
         </script>
     `);
     }
 });
 
-
-// Obtener todos los estudiantes
-app.get("/api/allstudents", async (req, res) => {
+// OBTENER TODOS LOS ESTUDIANTES
+app.get('/api/allstudents', async (req, res) => {
     try {
         const students = await studentsCRUD.getStudents();
         res.json(students)
     } catch (error) {
-        console.log(error);
-        res.status(500).send(`
-        <script>
-            alert("${error.message}");
-            window.location.href = "/";
-        </script>
-    `);
+        res.status(500).json({ error: 'Error interno del servidor', message: error.message });
     }
 });
 
-//obtener estudiantes por su rut
-app.get("/api/:rut", async (req, res) => {
+// ACTUALIZAR ESTUDIANTES
+app.put('/api/editar', async (req, res) => {
+    const { id, name, rut, course, level } = req.query;
+    if (id && name && rut && course && level) {
+        try {
+            const studentToUpdate = { id, name, rut, course, level };
+            const updatedStudent = await studentsCRUD.updateStudent(studentToUpdate);
+            if (updatedStudent) {
+                res.status(200).send('Estudiante actualizado correctamente.');
+            } else {
+                res.status(404).send(`Estudiante con ID ${id} no encontrado.`);
+            }
+        } catch (error) {
+            res.status(500).send('Error interno del servidor al actualizar el estudiante.');
+        }
+    } else {
+        res.status(400).send('Todos los campos son requeridos para actualizar el estudiante.');
+    }
+});
+
+// OBTENER ESTUDIANTES POR RUT
+app.get('/api/:rut', async (req, res) => {
     const rut = req.params.rut;
     try {
         const student = await studentsCRUD.getStudentsByRut(rut);
+        if (!student) {
+            return res.status(404).json({ error: 'Estudiante no encontrado' });
+        }
         res.json(student)
     } catch (error) {
-        console.log(error)
-    }
+        res.status(500).json({ error: 'Error interno del servidor' });    }
 });
 
-//Falta implementar el endpoint para el update
-
-//Endpoint eliminar un registro por id
-app.get("/api/eliminar/:id", async (req, res) => {
+// ELIMINAR UN REGISTRO POR ID
+app.delete('/api/eliminar/:id', async (req, res) => {
     const id = req.params.id;
     try {
         const student = await studentsCRUD.deleteStudent(id);
         if (student) {
             res.json({
-                message: "Estudiante eliminado.",
-                student})
+                message: 'Estudiante eliminado.',
+                student
+            })
         } else {
-            res.json({
+            res.status(404).json({
                 message: `Estudiante con id ${id} no existe.`
-                })
+            });
         }
     } catch (error) {
-        console.log(error)
+        res.status(500).json({
+            error: 'Error interno del servidor',
+            message: error.message
+        });
     }
 });
 
 app.listen(port, () => {
     log(`Servidor iniciado en el puerto ${port}`)
 });
-
-/*
-## CHECKLIST
-
-Crear endpoint para el update
-Actualizar, revisar manejo de errores y mensajes
-¿Formulario para el Update?
-Revisar idioma del código/contenido: ingles o español de todo el documento
-Mejorar aspecto visual del documento html
-Revisar: está todo en orden y sin código innecesario?
-Agregar readme
-Revisar comillas: simples o dobles
-Aspecto visual: letras, colores botones y fondos.
-Responsividad
-*/

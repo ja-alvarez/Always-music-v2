@@ -1,0 +1,9 @@
+.fixed-width {
+    width: 100px;
+    display: inline-block;
+    text-align: center;
+}
+
+.input-group .form-control {
+    flex: 1;
+}

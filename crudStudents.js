@@ -95,7 +95,8 @@ let studentsCRUD = {
     getStudentsByRut,
     addStudent,
     deleteStudent,
-    updateStudent
+    updateStudent,
+    consultarDB
 }
 
 export default studentsCRUD;

@@ -5,23 +5,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Always Music v2</title>
-    <!-- Bootstrap -->
+
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <!-- Estilos CSS personalizados -->
+    <link rel="stylesheet" href="/assets/css/styles.css">
+
+    <!-- jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.js"
+        integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
+
+    <!-- Bootstrap JS -->
     <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
-    <style type="text/css">
-        .fixed-width {
-            width: 100px;
-            display: inline-block;
-            text-align: center;
-        }
 
-        .input-group .form-control {
-            flex: 1;
-        }
-    </style>
+    <!-- Popper.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous"></script>
+
+    <!-- Axios -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0/axios.min.js"></script>
+
 </head>
 
 <body>
@@ -30,7 +38,7 @@
     </header>
 
     <main class="container pb-5">
-        <!-- Registro estudiantes -->
+        <!-- Formulario Registro Estudiantes -->
         <section class="sect-add-student">
             <form id="formAddStudent" action="/api/students" method="post" class="w-50 mx-auto">
                 <div class="input-group">
@@ -59,61 +67,147 @@
     y devuelve un JSON con un arreglo de todos los estudiantes -->
         <section class="w-50 mx-auto text-center">
             <form action="/api/allstudents" method="get">
-                <input type="submit" class="btn btn-dark my-2" value="Consultar todos los estudiantes">
+                <input type="submit" class="btn btn-dark my-2" value="Mostrar estudiantes desde la API">
             </form>
         </section>
 
+        <!-- Tabla con todos los estudiantes -->
         <section>
             <table class="table">
-                <thead>
+                <thead class="table-dark">
                     <tr>
                         <th scope="col">ID</th>
                         <th scope="col">Nombre</th>
                         <th scope="col">Rut</th>
                         <th scope="col">Curso</th>
                         <th scope="col">Nivel</th>
+                        <th scope="col">Acciones</th>
                     </tr>
                 </thead>
-                <tbody id="tabla-estudiantes">
-                    <!--  <tr>
-                            <th scope="row">1</th>
-                            <td></td>
-                            <td></td>
-                            <td></td>                        
-                            <td></td>                        
-                            <td></td>
-                    </tr> -->
+                <tbody id="tabla-estudiantes" class="table-secondary">
                 </tbody>
             </table>
         </section>
 
+        <!-- Modal Editar Estudiante-->
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="rounded p-4">
+                        <form>
+                            <div class="form-group row">
+                                <label class="col-sm-2 col-form-label">id</label>
+                                <div class="col-sm-10">
+                                    <input id="idModal" disabled type="text" class="form-control" name="id" />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-2 col-form-label">Nombre</label>
+                                <div class="col-sm-10">
+                                    <input id="nameModal" type="text" class="form-control" name="nombre" />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-2 col-form-label">Rut</label>
+                                <div class="col-sm-10">
+                                    <input id="rutModal" type="text" class="form-control" name="rut" />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-2 col-form-label">Curso</label>
+                                <div class="col-sm-10">
+                                    <input id="courseModal" type="text" class="form-control" name="course" />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-2 col-form-label">Nivel</label>
+                                <div class="col-sm-10">
+                                    <input id="levelModal" type="text" class="form-control" name="level" />
+                                </div>
+                            </div>
+                            <button class="btn btn-warning" onclick="edit()">Editar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
     <script>
         const fetchStudents = async () => {
             try {
-                const respuesta = await fetch ('/api/allstudents');
+                const respuesta = await fetch("/api/allstudents");
                 const data = await respuesta.json();
-                const cuerpoTabla = document.getElementById('tabla-estudiantes');
-                data.forEach(estudiantes => {
+                const cuerpoTabla = document.getElementById("tabla-estudiantes");
+                cuerpoTabla.innerHTML = ""; // Limpiamos la tabla antes de agregar nuevos estudiantes
+                data.forEach(estudiante => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td>${estudiantes.id}</td>
-                        <td>${estudiantes.name}</td>
-                        <td>${estudiantes.rut}</td>
-                        <td>${estudiantes.course}</td>
-                        <td>${estudiantes.level}</td>
-                    `;
+                    <td>${estudiante.id}</td>
+                    <td>${estudiante.name}</td>
+                    <td>${estudiante.rut}</td>
+                    <td>${estudiante.course}</td>
+                    <td>${estudiante.level}</td>
+                    <td>
+                        <!-- Botón para abrir el modal de edición -->
+                        <button class="btn btn-info" onclick='preEdit("${estudiante.id}","${estudiante.name}","${estudiante.rut}","${estudiante.course}","${estudiante.level}")' data-bs-toggle="modal" data-bs-target="#exampleModal">Editar</button>
+                        <!-- Botón para eliminar al estudiante -->
+                        <button class="btn btn-danger" onclick='eliminar("${estudiante.id}")'>Eliminar</button>
+                    </td>
+                `;
                     cuerpoTabla.appendChild(row);
                 });
             } catch (error) {
-                console.error('Error al obtener los datos de los estudiantes');
+                console.error("Error al obtener los datos de los estudiantes");
             }
         };
-        fetchStudents()
+        fetchStudents();
+
+        //Toma los datos del estudiante seleccionado y los carga en los campos del formulario dentro del modal de edición
+        function preEdit(id, name, rut, course, level) {
+            $("#idModal").val(id);
+            $("#nameModal").val(name);
+            $("#rutModal").val(rut);
+            $("#courseModal").val(course);
+            $("#levelModal").val(level);
+        };
+
+        // Función para editar un estudiante
+        function edit() {
+            let id = $("#idModal").val();
+            let name = $("#nameModal").val();
+            let rut = $("#rutModal").val();
+            let course = $("#courseModal").val();
+            let level = $("#levelModal").val();
+            axios.put(`/api/editar?id=${id}&name=${name}&rut=${rut}&course=${course}&level=${level}`)
+                .then((data) => {
+                    alert(data.data.message);
+                    fetchStudents();
+                })
+                .catch((error) => {
+                    console.error("Error al editar estudiante", error);
+                });
+            $("#exampleModal").modal("hide");
+        };
+
+        // Función para eliminar un estudiante
+        function eliminar(id) {
+            const confirmacion = confirm("¿Deseas eliminar este estudiante?");
+            if (confirmacion) {
+                axios.get(`/api/eliminar/${id}`).then((data) => {
+                    alert(data.data.message);
+                    fetchStudents();
+                })
+                    .catch((error) => {
+                        console.error("Error al eliminar estudiante", error);
+                    });
+            } else {
+                alert("La petición ha sido cancelada.");
+            }
+            $("#exampleModal").modal("hide");
+        }
     </script>
-
-
 </body>
 
 </html>
